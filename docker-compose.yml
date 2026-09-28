@@ -1,0 +1,66 @@
+version: '3.8'
+
+# ==============================================================================
+# Orquestração Docker Compose para os Ambientes Spring Boot (DES, TES, PROD)
+# Utiliza a MESMA imagem Docker parametrizada em runtime via SPRING_PROFILES_ACTIVE
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Ambiente DES (Desenvolvimento)
+  # ----------------------------------------------------------------------------
+  demo-des:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: desafio-votacao:latest
+    container_name: demo-app-des
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=des
+      - PORT=8080
+      - APP_BASE_URL=http://localhost:8080
+    profiles:
+      - des
+
+  # ----------------------------------------------------------------------------
+  # 2. Ambiente TES (Testes / Homologação)
+  # ----------------------------------------------------------------------------
+  demo-tes:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: desafio-votacao:latest
+    container_name: demo-app-tes
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=tes
+      - PORT=8080
+      - APP_BASE_URL=https://tes-api.exemplo.com
+      - CPF_VALIDATION_URL=https://tes-user-info.herokuapp.com/users
+    profiles:
+      - tes
+
+  # ----------------------------------------------------------------------------
+  # 3. Ambiente PROD (Produção)
+  # ----------------------------------------------------------------------------
+  demo-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: desafio-votacao:latest
+    container_name: demo-app-prod
+    ports:
+      - "8082:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - PORT=8080
+      - APP_BASE_URL=https://api.exemplo.com
+      - DB_URL=jdbc:h2:file:./data/votedb_prod;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      - DB_USERNAME=prod_user
+      - DB_PASSWORD=prod_secret_pass
+      - JPA_DDL_AUTO=update
+    profiles:
+      - prod
